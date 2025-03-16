@@ -1,0 +1,43 @@
+--Jesús Emiliano García Jiménez
+--A01751766
+--Dispositivo para crear una cruz en una pantalla VGA 640x480
+
+library IEEE;
+use ieee.std_logic_1164.all;
+
+entity INTECRUZ is
+    port ( CLK, RST, START: in std_logic;
+			  InB, InR : in std_logic_vector(3 downto 0);
+			  VSYNC, HSYNC : out std_logic;
+			  R, G, B : out std_logic_vector(3 downto 0));
+	 end INTECRUZ;
+
+architecture RTL of INTECRUZ is
+
+signal D, Q : std_logic_vector(9 downto 0);
+
+component MASUNO10 is
+    port ( A : in std_logic_vector(9 downto 0);
+           Z : out std_logic_vector(9 downto 0);
+			  Cout : out std_logic);
+end component MASUNO10;
+
+begin
+
+I0 : MASUNO10 port map (Q, D, Cout);
+CUENTA <= Q;
+
+P1: process(CLK, RST)
+    begin
+        if (RST = '0') then
+            Q <= "0000000000";	 
+        elsif (CLK'event and CLK = '1') then
+            if Q = "1100011111" then 
+					 Q <= (others => '0');
+				else
+					 Q <= D;
+				end if;
+        end if;
+    end process P1;
+
+end RTL;
