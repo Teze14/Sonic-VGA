@@ -1,0 +1,1 @@
+Modulo para sumar de un valor en un valor que se utiliza en el contador modulo 800.
