@@ -1,0 +1,1 @@
+Modulo que suma de un valor en un valor para utilizarse en el contador modulo 525.
