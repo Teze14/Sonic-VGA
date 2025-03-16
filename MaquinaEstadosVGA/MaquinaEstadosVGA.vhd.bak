@@ -1,0 +1,174 @@
+--Jesús Emiliano García Jiménez
+--A01751766
+--Maquina de estados Semaforo
+
+library IEEE;
+use ieee.std_logic_1164.all;
+
+entity MaquinaEstadosSemaforo is
+    port ( CLK, RST, START: in std_logic;
+           CNT : in std_logic_vector(4 downto 0);
+			  EO, OE : out std_logic_vector(3 downto 0);
+			  NS, SN : out std_logic_vector(2 downto 0);
+			  EST : out std_logic_vector(2 downto 0));
+end MaquinaEstadosSemaforo;
+
+architecture RTL of MaquinaEstadosSemaforo is
+	component CNT32 is
+    port ( CLK, RST : in std_logic;
+           CUENTA : out std_logic_vector(4 downto 0);
+			  Cout : out std_logic);
+	 end component;
+	 
+	 type ESTADOS is (S0, S1, S2, S3, S4, S5, S6);
+	 signal EDO, EDOF: ESTADOS;
+
+	 begin
+		P1: process (CLK, RST)  -- Definición de los FlipFlops tipo D
+			 begin
+				  if (RST = '0') then  -- RST asincrono activo en bajo
+						EDO <= S0;
+				  elsif (CLK'event and CLK = '1') then  -- CLK con flanco de subida
+						EDO <= EDOF;
+				  end if;
+			 end process P1;
+
+		P2: process (EDO, CNT, START, TA, TB, TC, TD, TE, TF) is  -- Transiciones de los estados
+			 begin
+				  case EDO is
+						when S0 => if START = '1' then
+											EDOF <= S1;
+									  else
+											EDOF <= S0;
+									  end if;
+									  
+						when S1 => if CNT = TA then
+											EDOF <= S2;
+									  else
+											EDOF <= S1;
+									  end if;
+									  
+						when S2 => if CNT = TB then
+											EDOF <= S3;
+									  else
+											EDOF <= S2;
+									  end if;
+									  
+						when S3 => if CNT = TC then
+											EDOF <= S4;
+									  else
+											EDOF <= S3;
+									  end if;
+									  
+						when S4 => if CNT = TD then
+											EDOF <= S5;
+									  else
+											EDOF <= S4;
+									  end if;
+									  
+						when S5 => if CNT = TE then
+											EDOF <= S6;
+									  else
+											EDOF <= S5;
+									  end if;
+						when S6 => if CNT = TF then
+											EDOF <= S0;
+									  else
+											EDOF <= S6;
+									  end if;
+						when others => null;
+				  end case;
+			 end process P2;
+
+		P3: process (EDO, noct) is
+			 begin
+				 case EDO is
+					  when S0 =>  if (noct = '0') then
+											 EO <= "0000";
+											 OE <= "0000";
+											 NS <= "000";
+											 SN <= "000";
+										 else
+											 EO <= "0000";
+											 OE <= "0000";
+											 NS <= "000";
+											 SN <= "000";
+										 end if;
+										 EST <= "000";
+					  when S1 =>    if (noct = '0') then
+											 EO <= "1000";
+											 OE <= "1000";
+											 NS <= "001";
+											 SN <= "001";
+										 else
+											 EO <= "0100";
+											 OE <= "0100";
+											 NS <= "010";
+											 SN <= "010";
+										 end if;
+										 EST <= "001";
+					  when S2 =>    if (noct = '0') then
+											 EO <= "0100";
+											 OE <= "0100";
+											 NS <= "001";
+											 SN <= "001";
+										 else
+											 EO <= "0000";
+											 OE <= "0000";
+											 NS <= "000";
+											 SN <= "000";
+										 end if;
+										 EST <= "010";
+					  when S3 =>    if (noct = '0') then
+											 EO <= "0001";
+											 OE <= "0010";
+											 NS <= "001";
+											 SN <= "001";
+										 else
+											 EO <= "0100";
+											 OE <= "0100";
+											 NS <= "010";
+											 SN <= "010";
+										 end if;
+										 EST <= "011";
+					  when S4 =>  if (noct = '0') then
+											 EO <= "0010";
+											 OE <= "0010";
+											 NS <= "100";
+											 SN <= "100";
+										 else
+											 EO <= "0000";
+											 OE <= "0000";
+											 NS <= "000";
+											 SN <= "000";
+										 end if;
+										 EST <= "100";
+					  when S5 =>  if (noct = '0') then
+											 EO <= "0010";
+											 OE <= "0010";
+											 NS <= "010";
+											 SN <= "010";
+										 else
+											 EO <= "0100";
+											 OE <= "0100";
+											 NS <= "010";
+											 SN <= "010";
+										 end if;
+										 EST <= "101";
+					  when S6 =>  if (noct = '0') then
+											 EO <= "0010";
+											 OE <= "0001";
+											 NS <= "001";
+											 SN <= "001";
+										 else
+											 EO <= "0100";
+											 OE <= "0100";
+											 NS <= "010";
+											 SN <= "010";
+										 end if;
+										 EST <= "110";
+					  when others => null;
+				 end case;
+			end process P3;
+
+end RTL;
